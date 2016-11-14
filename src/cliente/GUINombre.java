@@ -1,5 +1,8 @@
 package cliente;
 
+import java.awt.event.KeyEvent;
+import javax.swing.JFrame;
+
 /**
  *
  * @author Alejandro Campoy Nieves.
@@ -8,12 +11,12 @@ package cliente;
  * La clase GUINombre se encarga de pedir el nombre de Usuario que va a utilizar el cliente.
  * 
  */
-public class GUINombre extends javax.swing.JPanel {
-
-    /**
-     * Creates new form GUINombre
-     */
-    public GUINombre() {
+public class GUINombre extends JFrame{
+    private ClienteTCP cliente;
+    private GUI gui;
+    
+    public GUINombre(ClienteTCP c) {
+        cliente = c;
         initComponents();
     }
 
@@ -27,33 +30,65 @@ public class GUINombre extends javax.swing.JPanel {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
+        user = new javax.swing.JTextField();
+        send = new javax.swing.JButton();
+        jLabel2 = new javax.swing.JLabel();
+        host = new javax.swing.JTextField();
 
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel1.setText("Introduzca su nombre de usuario");
-        add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 10, 228, 30));
+        jLabel1.setText("Nombre de Usuario");
+        add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 10, 228, 30));
 
-        jTextField1.addKeyListener(new java.awt.event.KeyAdapter() {
+        user.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
-                jTextField1KeyPressed(evt);
+                userKeyPressed(evt);
             }
         });
-        add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, 340, -1));
+        add(user, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, 340, -1));
 
-        jButton1.setText("Entrar");
-        add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 90, -1, -1));
+        send.setText("Entrar");
+        send.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                sendActionPerformed(evt);
+            }
+        });
+        add(send, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 170, -1, -1));
+
+        jLabel2.setText("Host");
+        add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 80, -1, -1));
+
+        host.setText("localhost");
+        add(host, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 110, 340, -1));
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jTextField1KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextField1KeyPressed
-        //evt.
-    }//GEN-LAST:event_jTextField1KeyPressed
+    // Pulsar Enter equivale a enviar
+    private void userKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_userKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER)
+            sendActionPerformed(null);
+    }//GEN-LAST:event_userKeyPressed
+
+    private void sendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendActionPerformed
+        if (cliente.setHost(host.getText())) {
+            
+            if (cliente.setUserName(user.getText())) {
+                gui = new GUI(cliente);
+                this.setVisible(false);
+                gui.pack();
+                gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                gui.setLocationRelativeTo(null);
+                gui.setVisible(true);
+            }
+        }
+            
+    }//GEN-LAST:event_sendActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JTextField host;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JButton send;
+    private javax.swing.JTextField user;
     // End of variables declaration//GEN-END:variables
 }

@@ -1,5 +1,7 @@
 package cliente;
 
+import javax.swing.JFrame;
+
 /**
  *
  * @author Alejandro Campoy Nieves.
@@ -8,12 +10,13 @@ package cliente;
  * La clase GUI se encarga de manejar la interacción del usuario mientras se
  * encuentre conectado en el chat.
  */
-public class GUI extends javax.swing.JPanel {
-
+public class GUI extends JFrame {
+    private ClienteTCP cliente;
     /**
      * Creates new form GUI
      */
-    public GUI() {
+    public GUI(ClienteTCP c) {
+        cliente = c;
         initComponents();
     }
 
@@ -63,7 +66,7 @@ public class GUI extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void enviarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enviarActionPerformed
-        // TODO add your handling code here:
+
     }//GEN-LAST:event_enviarActionPerformed
 
 
