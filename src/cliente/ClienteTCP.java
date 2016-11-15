@@ -33,6 +33,10 @@ public class ClienteTCP {
         }
     }
     
+    public Socket getSocket() {
+        return socket;
+    }
+    
     public boolean setUserName(String name) {
         try {
             outPrinter.println("LOGIN " + name);
@@ -48,10 +52,31 @@ public class ClienteTCP {
         }
        return false;
     }
-    void receiveMessage() {
-        
-        try { // Y si hay más de una línea??
-            String mensaje = inReader.readLine();
+    
+    synchronized void  sendMessage(String message) {
+        try {
+            String toSend = "SEND " + message;
+            outPrinter.println(toSend);
+            
+            String response = inReader.readLine();
+            if (!"SENT".equals(response))
+                System.err.println("Error al enviar mensaje");
+        } catch (IOException ex) {
+            System.err.println(ex);
+            System.err.println("Excepcion al enviar mensaje");
+        }
+    }
+    
+    void receiveMessage(GUI g) {
+        try {
+            outPrinter.println("UPDATE");
+            String message = inReader.readLine();
+            if ("IDDLE".equals(message)) return;
+            
+            
+            int pos = message.indexOf(' ');
+            String toAdd = message.substring(pos + 1);
+            g.addMessage(message);
         }
         catch (IOException io) {
             System.err.println(io);

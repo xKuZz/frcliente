@@ -1,5 +1,6 @@
 package cliente;
 
+import java.io.IOException;
 import javax.swing.JFrame;
 
 /**
@@ -11,13 +12,26 @@ import javax.swing.JFrame;
  * encuentre conectado en el chat.
  */
 public class GUI extends JFrame {
-    private ClienteTCP cliente;
+    private ClienteTCP cliente; // Se encarga de la emisiones de datos del cliente.
+    private Reader reader;
     /**
-     * Creates new form GUI
+     * Inicializamos todo en el contructor
+     * @param c Única instancia creada de la clase ClienteTCP (no es un singleton)
      */
     public GUI(ClienteTCP c) {
         cliente = c;
         initComponents();
+        reader = new Reader(cliente, this);
+        reader.start();
+    }
+    
+    /**
+     * Este método es utilizado por la hebra lectora para añadir el mensaje
+     * recibido a la interfaz
+     * @param message Mensaje a añadir en el área de chat.
+     */
+    public void addMessage(String message) {
+        chat.setText(chat.getText() + message);
     }
 
     /**
@@ -64,9 +78,13 @@ public class GUI extends JFrame {
         });
         add(enviar, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 290, 120, 51));
     }// </editor-fold>//GEN-END:initComponents
-
+    // Al pulsar enviar vaciamos el área de escritura y envimos el texto
     private void enviarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enviarActionPerformed
-
+        String toSend = texto.getText();
+        if (!toSend.isEmpty()) {
+            cliente.sendMessage(toSend);
+            texto.setText("");
+        }
     }//GEN-LAST:event_enviarActionPerformed
 
 
