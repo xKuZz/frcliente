@@ -1,7 +1,9 @@
 package cliente;
 
+import java.awt.Color;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
+import java.awt.event.WindowEvent;
+import javax.swing.text.*;
 import javax.swing.JFrame;
 import javax.swing.KeyStroke;
 
@@ -43,8 +45,44 @@ public class GUI extends JFrame {
      * @param message Mensaje a añadir en el área de chat.
      */
     public void addMessage(String message) {
-        chat.setText(chat.getText() + message);
+        try {
+            int pos = message.indexOf(":");
+            String user = message.substring(0, pos + 1);
+            String data = message.substring(pos + 1);
+            
+            /** Ponemos de un color el usuario y de otro el texto. **/
+            // 1- Obtenemos el documento (Styled para poder poner colores y tal) del TextPane
+            Document doc = chat.getStyledDocument();
+            
+            // 2 - Configuramos un color
+            SimpleAttributeSet set = new SimpleAttributeSet();
+            // Ponemos verde en verde y negrita
+            StyleConstants.setForeground(set, Color.green);
+            StyleConstants.setBold(set, true);
+            
+            // 3 - Insertamos el nombre de usuario
+            doc.insertString(doc.getLength(), user, set);
+            
+            // 4 - Para el texto lo dejamos en blanco
+            set = new SimpleAttributeSet();
+            StyleConstants.setForeground(set, Color.white);
+            
+            doc.insertString(doc.getLength(), data, set);
+        } catch (BadLocationException ex) {
+            System.err.println(ex);
+            System.err.println("Error al colocar texto en la posición indicada.");
+        }
     }
+
+    @Override
+    protected void processWindowEvent(WindowEvent e) {
+        if (e.getID() == WindowEvent.WINDOW_CLOSING) {
+            cliente.close();
+        }
+        super.processWindowEvent(e); 
+    }
+    
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -56,7 +94,7 @@ public class GUI extends JFrame {
     private void initComponents() {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        chat = new javax.swing.JTextArea();
+        chat = new javax.swing.JTextPane();
         jScrollPane2 = new javax.swing.JScrollPane();
         texto = new javax.swing.JTextArea();
         enviar = new javax.swing.JButton();
@@ -65,14 +103,12 @@ public class GUI extends JFrame {
 
         jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-        chat.setEditable(false);
-        chat.setBackground(new java.awt.Color(76, 76, 76));
-        chat.setColumns(20);
-        chat.setForeground(new java.awt.Color(254, 254, 254));
-        chat.setRows(5);
+        chat.setBackground(new java.awt.Color(70, 70, 70));
         jScrollPane1.setViewportView(chat);
 
         getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 600, 280));
+
+        jScrollPane2.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         texto.setBackground(new java.awt.Color(156, 156, 156));
         texto.setColumns(20);
@@ -100,6 +136,7 @@ public class GUI extends JFrame {
         String toSend = texto.getText();
         if (!toSend.isEmpty()) {
             cliente.sendMessage(toSend);
+            addMessage(cliente.getUserName() + ": " + toSend + "\n");
             texto.setText("");
         }
     }//GEN-LAST:event_enviarActionPerformed
@@ -112,7 +149,7 @@ public class GUI extends JFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextArea chat;
+    private javax.swing.JTextPane chat;
     private javax.swing.JButton enviar;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;

@@ -79,12 +79,12 @@ public class GUINombre extends JFrame{
             
             if (cliente.setUserName(user.getText())) {
                 gui = new GUI(cliente);
-                this.setVisible(false);
                 gui.startup();
                 gui.pack();
                 gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 gui.setLocationRelativeTo(null);
                 gui.setVisible(true);
+                this.dispose();
             }
             else {
                 System.err.println("El nombre ya está siendo usado");

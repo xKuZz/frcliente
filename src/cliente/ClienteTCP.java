@@ -35,9 +35,6 @@ public class ClienteTCP {
         return userName;
     }
     
-    
-    
-    
     /** Configura e inicia conexión TCP con el host indicado. Además inicializa buffers TCP
      *  de entrada y salida
      * @param h Host con el que conectar.
@@ -117,6 +114,7 @@ public class ClienteTCP {
             outPrinter.println("UPDATE");
             String message = inReader.readLine();
             if ("IDDLE".equals(message)) return;
+            if ("SENT".equals(message)) return;
             
             
             int pos = message.indexOf(' ');
@@ -129,6 +127,12 @@ public class ClienteTCP {
         }
     }
     
+    /** Cierra la conexión con el servidor.
+     * 
+     */
+    void close() {
+        outPrinter.println("CLOSE");
+    }
     
     
 }
