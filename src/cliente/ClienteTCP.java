@@ -9,6 +9,7 @@ import java.net.Socket;
  *
  * @author Alejandro Campoy Nieves.
  * @author David Criado Ramón.
+ * La clase ClienteTCP se encarga de establecer y tratar las conexiones del cliente con el Servidor.
  */
 public class ClienteTCP {
     private String host;
@@ -16,7 +17,32 @@ public class ClienteTCP {
     private PrintWriter outPrinter;
     private BufferedReader inReader;
     private Socket socket;
+    private String userName;
+
+    /** Nos permite acceder al nombre del host
+     * 
+     * @return Host al que nos hemos conectado.
+     */
+    public String getHost() {
+        return host;
+    }
+
+    /** Nos permite acceder al nombre de Usuario que tenemos puesto
+     * 
+     * @return Nombre de usuario que tenemos puesto.
+     */
+    public String getUserName() {
+        return userName;
+    }
     
+    
+    
+    
+    /** Configura e inicia conexión TCP con el host indicado. Además inicializa buffers TCP
+     *  de entrada y salida
+     * @param h Host con el que conectar.
+     * @return Si la conexión ha sido existosa.
+     */
     public boolean setHost(String h) {
         host = h;
         try {
@@ -33,15 +59,26 @@ public class ClienteTCP {
         }
     }
     
+    /** Da acceso al socket del cliente.
+     * 
+     * @return Socket del cliente.
+     */
+    
     public Socket getSocket() {
         return socket;
     }
     
+    /** Configura el nombre de usuario del cliente
+     * 
+     * @param name Nombre de usuario a utilizar.
+     * @return Si el nombre de usuario ha podido ser utilizado.
+     */
     public boolean setUserName(String name) {
         try {
             outPrinter.println("LOGIN " + name);
             String respuesta = inReader.readLine();
             if ("OK".equals(respuesta)) {
+                userName = name;
                 System.out.println("Usando nombre: " + name);
                 return true;
             }
@@ -53,6 +90,10 @@ public class ClienteTCP {
        return false;
     }
     
+    /** Envia un mensaje de chat público al servidor
+     * 
+     * @param message Mensaje a enviar
+     */
     synchronized void  sendMessage(String message) {
         try {
             String toSend = "SEND " + message;
@@ -67,6 +108,10 @@ public class ClienteTCP {
         }
     }
     
+    /** Intenta actualizar los mensajes recibidos del servidor.
+     * 
+     * @param g Interfaz gráfica a la que añadir el mensaje.
+     */
     void receiveMessage(GUI g) {
         try {
             outPrinter.println("UPDATE");
@@ -75,8 +120,8 @@ public class ClienteTCP {
             
             
             int pos = message.indexOf(' ');
-            String toAdd = message.substring(pos + 1);
-            g.addMessage(message);
+            String toAdd = message.substring(pos + 1) + '\n';
+            g.addMessage(toAdd);
         }
         catch (IOException io) {
             System.err.println(io);

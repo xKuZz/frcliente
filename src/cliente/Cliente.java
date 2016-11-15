@@ -11,10 +11,8 @@ import javax.swing.JFrame;
  */
 public class Cliente {
     private static final ClienteTCP cliente = new ClienteTCP();
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
+        // Iniciamos GUI de escoger nombre
         GUINombre initialGUI = new GUINombre(cliente);
         initialGUI.setVisible(true);
         initialGUI.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

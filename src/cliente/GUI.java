@@ -1,7 +1,9 @@
 package cliente;
 
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import javax.swing.JFrame;
+import javax.swing.KeyStroke;
 
 /**
  *
@@ -20,8 +22,18 @@ public class GUI extends JFrame {
      */
     public GUI(ClienteTCP c) {
         cliente = c;
+        setTitle(c.getUserName()+"@"+c.getHost());
         initComponents();
+        // Desactivamos la función estándar del enter para sólo permitir usar Enter para enviar.
+        texto.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "none");
         reader = new Reader(cliente, this);
+    }
+    
+    /**
+     * Pone en ejecución la hebra que cada segundo busca nuevas actualizaciones.
+     * 
+     */
+    public void startup() {
         reader.start();
     }
     
@@ -49,7 +61,7 @@ public class GUI extends JFrame {
         texto = new javax.swing.JTextArea();
         enviar = new javax.swing.JButton();
 
-        setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
@@ -60,15 +72,20 @@ public class GUI extends JFrame {
         chat.setRows(5);
         jScrollPane1.setViewportView(chat);
 
-        add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 600, 280));
+        getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 600, 280));
 
         texto.setBackground(new java.awt.Color(156, 156, 156));
         texto.setColumns(20);
         texto.setForeground(new java.awt.Color(254, 254, 254));
         texto.setRows(5);
+        texto.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                textoKeyPressed(evt);
+            }
+        });
         jScrollPane2.setViewportView(texto);
 
-        add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 310, 470, -1));
+        getContentPane().add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 310, 470, -1));
 
         enviar.setText("Enviar");
         enviar.addActionListener(new java.awt.event.ActionListener() {
@@ -76,9 +93,9 @@ public class GUI extends JFrame {
                 enviarActionPerformed(evt);
             }
         });
-        add(enviar, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 290, 120, 51));
+        getContentPane().add(enviar, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 290, 120, 51));
     }// </editor-fold>//GEN-END:initComponents
-    // Al pulsar enviar vaciamos el área de escritura y envimos el texto
+    // Al pulsar enviar vaciamos el área de escritura y envimos el texto.
     private void enviarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enviarActionPerformed
         String toSend = texto.getText();
         if (!toSend.isEmpty()) {
@@ -86,6 +103,12 @@ public class GUI extends JFrame {
             texto.setText("");
         }
     }//GEN-LAST:event_enviarActionPerformed
+    // Pulsar Enter equivale a enviar.
+    private void textoKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textoKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER)
+            enviarActionPerformed(null);
+      
+    }//GEN-LAST:event_textoKeyPressed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

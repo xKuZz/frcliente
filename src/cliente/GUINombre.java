@@ -9,12 +9,18 @@ import javax.swing.JFrame;
  * @author David Criado Ramón.
  * 
  * La clase GUINombre se encarga de pedir el nombre de Usuario que va a utilizar el cliente.
+ * Si son correctos se encarga de iniciar la ventana principal
  * 
  */
 public class GUINombre extends JFrame{
     private ClienteTCP cliente;
     private GUI gui;
     
+    /** Constructor de la GUI Nombre
+     * 
+     * @param c ClienteTCP que manejará la conexión que se creará sobre el host
+     * y nombre de usuario obtenidos en esta clase.
+     */
     public GUINombre(ClienteTCP c) {
         cliente = c;
         initComponents();
@@ -35,17 +41,17 @@ public class GUINombre extends JFrame{
         jLabel2 = new javax.swing.JLabel();
         host = new javax.swing.JTextField();
 
-        setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setText("Nombre de Usuario");
-        add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 10, 228, 30));
+        getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 10, 228, 30));
 
         user.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 userKeyPressed(evt);
             }
         });
-        add(user, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, 340, -1));
+        getContentPane().add(user, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, 340, -1));
 
         send.setText("Entrar");
         send.addActionListener(new java.awt.event.ActionListener() {
@@ -53,13 +59,13 @@ public class GUINombre extends JFrame{
                 sendActionPerformed(evt);
             }
         });
-        add(send, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 170, -1, -1));
+        getContentPane().add(send, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 170, -1, -1));
 
         jLabel2.setText("Host");
-        add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 80, -1, -1));
+        getContentPane().add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 80, -1, -1));
 
         host.setText("localhost");
-        add(host, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 110, 340, -1));
+        getContentPane().add(host, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 110, 340, -1));
     }// </editor-fold>//GEN-END:initComponents
 
     // Pulsar Enter equivale a enviar
@@ -74,11 +80,20 @@ public class GUINombre extends JFrame{
             if (cliente.setUserName(user.getText())) {
                 gui = new GUI(cliente);
                 this.setVisible(false);
+                gui.startup();
                 gui.pack();
                 gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 gui.setLocationRelativeTo(null);
                 gui.setVisible(true);
             }
+            else {
+                System.err.println("El nombre ya está siendo usado");
+                // TO-DO Añadir información en interfaz gráfica
+            }
+        }
+        else {
+            System.err.println("No hemos podido conctactar con el host");
+            // TO-DO Añadir información en la interfaz gráfica.
         }
             
     }//GEN-LAST:event_sendActionPerformed
