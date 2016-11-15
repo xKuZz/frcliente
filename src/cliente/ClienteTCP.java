@@ -10,7 +10,7 @@ import java.net.Socket;
  * @author Alejandro Campoy Nieves.
  * @author David Criado Ramón.
  */
-Dpublic class ClienteTCP {
+public class ClienteTCP {
     private String host;
     private final int PORT = 2036;
     private PrintWriter outPrinter;
@@ -35,7 +35,7 @@ Dpublic class ClienteTCP {
     
     public boolean setUserName(String name) {
         try {
-            outPrinter.println("LOGIN" + name);
+            outPrinter.println("LOGIN " + name);
             String respuesta = inReader.readLine();
             if ("OK".equals(respuesta)) {
                 System.out.println("Usando nombre: " + name);
