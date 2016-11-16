@@ -1,6 +1,7 @@
 package cliente;
 
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 import javax.swing.JFrame;
 
 /**
@@ -13,8 +14,9 @@ import javax.swing.JFrame;
  * 
  */
 public class GUINombre extends JFrame{
-    private ClienteTCP cliente;
+    private final ClienteTCP cliente;
     private GUI gui;
+    private boolean conectado = false;
     
     /** Constructor de la GUI Nombre
      * 
@@ -34,17 +36,19 @@ public class GUINombre extends JFrame{
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
         jLabel1 = new javax.swing.JLabel();
         user = new javax.swing.JTextField();
         send = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         host = new javax.swing.JTextField();
+        error = new javax.swing.JLabel();
 
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setText("Nombre de Usuario");
-        getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 10, 228, 30));
+        getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 10, 140, 30));
 
         user.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
@@ -59,13 +63,16 @@ public class GUINombre extends JFrame{
                 sendActionPerformed(evt);
             }
         });
-        getContentPane().add(send, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 170, -1, -1));
+        getContentPane().add(send, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 180, -1, -1));
 
         jLabel2.setText("Host");
         getContentPane().add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 80, -1, -1));
 
         host.setText("localhost");
         getContentPane().add(host, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 110, 340, -1));
+
+        error.setForeground(new java.awt.Color(148, 1, 1));
+        getContentPane().add(error, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 150, 340, 20));
     }// </editor-fold>//GEN-END:initComponents
 
     // Pulsar Enter equivale a enviar
@@ -73,13 +80,21 @@ public class GUINombre extends JFrame{
         if (evt.getKeyCode() == KeyEvent.VK_ENTER)
             sendActionPerformed(null);
     }//GEN-LAST:event_userKeyPressed
-
+    // Acciónde Enviar. Intentar conectar al servidor con un nombre de usuario
+    // Cierra conexiones antiguas si procede e informa de error de conexión/usuario.
     private void sendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendActionPerformed
+        if ("".equals(user.getText().replaceAll(" ", ""))) {
+            error.setText("No se admite nombre de usuario en blanco");
+            return;
+        }
+        if (conectado && !cliente.getHost().equals(host.getText()))
+                cliente.close();
+                
         if (cliente.setHost(host.getText())) {
-            
+            conectado = true;
             if (cliente.setUserName(user.getText())) {
                 gui = new GUI(cliente);
-                gui.startup();
+                cliente.startup(gui);
                 gui.pack();
                 gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 gui.setLocationRelativeTo(null);
@@ -88,18 +103,33 @@ public class GUINombre extends JFrame{
             }
             else {
                 System.err.println("El nombre ya está siendo usado");
-                // TO-DO Añadir información en interfaz gráfica
+                error.setText(user.getText() + " ya está siendo usado");
             }
         }
         else {
+            conectado = false;
             System.err.println("No hemos podido conctactar con el host");
-            // TO-DO Añadir información en la interfaz gráfica.
+            error.setText("No hemos podido conectar a " + host.getText());
         }
             
+        
+        
     }//GEN-LAST:event_sendActionPerformed
 
+    // Para cerrar conexión al cerrar ventana
+    @Override
+    protected void processWindowEvent(WindowEvent e) {
+        if (conectado)
+            if (e.getID() == WindowEvent.WINDOW_CLOSING) {
+                if (!cliente.close()) 
+                  System.err.println("Mensaje de despedida incorrecto");
+            
+            }
+        super.processWindowEvent(e); 
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel error;
     private javax.swing.JTextField host;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

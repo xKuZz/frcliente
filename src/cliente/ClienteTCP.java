@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashSet;
 /**
  *
  * @author Alejandro Campoy Nieves.
@@ -18,6 +20,9 @@ public class ClienteTCP {
     private BufferedReader inReader;
     private Socket socket;
     private String userName;
+    private HashSet<String> usuarios = new HashSet();
+    private final Reader reader = new Reader(this);
+    private GUI gui;
 
     /** Nos permite acceder al nombre del host
      * 
@@ -48,7 +53,10 @@ public class ClienteTCP {
             inReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             System.out.println("Conexión a " + host + ":" + Integer.toString(PORT) 
                     + " iniciada correctamente");
-            return true;
+            
+            // Probamos la conexión con el servidor
+            String bienvenida = inReader.readLine();
+            return "HELLO".equals(bienvenida);
         } catch (IOException io) {
             System.err.println(io);
             System.err.println("Error al conectar con el host");
@@ -64,6 +72,16 @@ public class ClienteTCP {
     public Socket getSocket() {
         return socket;
     }
+
+
+    
+    /** Da acceso al conjunto de usuarios conectados.
+     * 
+     * @return Conjunto de usuarios conectados.
+     */
+    public HashSet<String> getUsuarios() {
+        return usuarios;
+    }
     
     /** Configura el nombre de usuario del cliente
      * 
@@ -76,6 +94,7 @@ public class ClienteTCP {
             String respuesta = inReader.readLine();
             if ("OK".equals(respuesta)) {
                 userName = name;
+                usuarios.add(name);
                 System.out.println("Usando nombre: " + name);
                 return true;
             }
@@ -86,6 +105,7 @@ public class ClienteTCP {
         }
        return false;
     }
+    
     
     /** Envia un mensaje de chat público al servidor
      * 
@@ -105,21 +125,49 @@ public class ClienteTCP {
         }
     }
     
+    /**
+     * Pone ClienteTCP en modo activo. Habilita la hebra y asocia una interfaz
+     * gráfica a la clase
+     * @param gui Interfaz gráfica a asociar
+     */
+    public void startup(GUI gui) {
+        this.gui = gui;
+        reader.start();
+    }
+    
     /** Intenta actualizar los mensajes recibidos del servidor.
      * 
-     * @param g Interfaz gráfica a la que añadir el mensaje.
+     * 
      */
-    void receiveMessage(GUI g) {
+    void receiveMessage() {
         try {
             outPrinter.println("UPDATE");
-            String message = inReader.readLine();
-            if ("IDDLE".equals(message)) return;
-            if ("SENT".equals(message)) return;
-            
-            
-            int pos = message.indexOf(' ');
-            String toAdd = message.substring(pos + 1) + '\n';
-            g.addMessage(toAdd);
+            ArrayList<String> toProcess = new ArrayList();
+            String line = null;
+            while (!"END".equals(line = inReader.readLine()) ) {
+               toProcess.add(line);
+            }
+        
+            for (String message : toProcess) {
+                if ("END".equals(message)) break;
+                if ("SENT".equals(message)) break;
+           
+                int pos = message.indexOf(' ');
+                System.out.println(message);
+                String accion = message.substring(0, pos);
+                String data = message.substring(pos + 1);
+                
+                if ("PUT".equals(accion))
+                    gui.addMessage(data + "\n");
+                else if ("JOIN".equals(accion)) {
+                    usuarios.add(data);
+                    gui.updateList(usuarios);
+                }
+                else { // "LEFT"
+                    usuarios.remove(data);
+                    gui.updateList(usuarios);
+                }
+            }
         }
         catch (IOException io) {
             System.err.println(io);
@@ -128,10 +176,18 @@ public class ClienteTCP {
     }
     
     /** Cierra la conexión con el servidor.
-     * 
+     *  @return Si la conexión ha sido cerrada correctamente.
      */
-    void close() {
+    public boolean close() {
         outPrinter.println("CLOSE");
+        String message = "";
+        try {
+            message = inReader.readLine();
+        } catch (IOException ex) {
+            System.err.println(ex);
+            System.err.println("Error al cerrar la conexión");
+        }
+        return "BYE".equals(message);
     }
     
     

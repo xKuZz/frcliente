@@ -7,18 +7,16 @@ package cliente;
  * @author David Criado Ramón.
  */
 public class Reader extends Thread {
-    private ClienteTCP cliente;
-    private GUI gui;
-    Reader(ClienteTCP c, GUI g) {
+    private final ClienteTCP cliente;
+    Reader(ClienteTCP c) {
         cliente = c;
-        gui = g;
     }
     @Override
     public void run() {
         while (true) {
            try {
                 Thread.sleep(1000);
-                cliente.receiveMessage(gui);
+                cliente.receiveMessage();
             
            } catch (InterruptedException ex) {
                 System.err.println(ex);
