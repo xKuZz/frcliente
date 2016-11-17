@@ -102,7 +102,8 @@ public class GUI extends JFrame {
             int hour = calendar.get(Calendar.HOUR_OF_DAY);
             int minute = calendar.get(Calendar.MINUTE);
             
-            String time = " [" + Integer.toString(hour) + ":" + Integer.toString(minute) + "]:";
+            String time = " [%2d:%2d]: ";
+            time = String.format(time, hour, minute);
             String data = message.substring(pos + 1);
             
             /** Ponemos de un color el usuario y de otro el texto. **/
