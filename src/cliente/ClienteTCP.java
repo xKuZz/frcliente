@@ -56,7 +56,7 @@ public class ClienteTCP {
             
             // Probamos la conexión con el servidor
             String bienvenida = inReader.readLine();
-            return "HELLO".equals(bienvenida);
+            return "50 HELLO".equals(bienvenida);
         } catch (IOException io) {
             System.err.println(io);
             System.err.println("Error al conectar con el host");
@@ -90,9 +90,9 @@ public class ClienteTCP {
      */
     public boolean setUserName(String name) {
         try {
-            outPrinter.println("LOGIN " + name);
+            outPrinter.println("100 LOGIN " + name);
             String respuesta = inReader.readLine();
-            if ("OK".equals(respuesta)) {
+            if ("101 OK".equals(respuesta)) {
                 userName = name;
                 usuarios.add(name);
                 System.out.println("Usando nombre: " + name);
@@ -113,11 +113,11 @@ public class ClienteTCP {
      */
     synchronized void  sendMessage(String message) {
         try {
-            String toSend = "SEND " + message;
+            String toSend = "300 SEND " + message;
             outPrinter.println(toSend);
             
             String response = inReader.readLine();
-            if (!"SENT".equals(response))
+            if (!"301 SENT".equals(response))
                 System.err.println("Error al enviar mensaje");
         } catch (IOException ex) {
             System.err.println(ex);
@@ -141,31 +141,35 @@ public class ClienteTCP {
      */
     void receiveMessage() {
         try {
-            outPrinter.println("UPDATE");
+            outPrinter.println("200 UPDATE");
             ArrayList<String> toProcess = new ArrayList();
             String line = null;
-            while (!"END".equals(line = inReader.readLine()) ) {
+            while (!"202 END".equals(line = inReader.readLine()) ) {
                toProcess.add(line);
             }
         
             for (String message : toProcess) {
-                if ("END".equals(message)) break;
-                if ("SENT".equals(message)) break;
+                if ("202 END".equals(message)) break;
+                if ("301 SENT".equals(message)) break;
            
                 int pos = message.indexOf(' ');
+                pos = message.indexOf(' ', pos+1);
                 System.out.println(message);
                 String accion = message.substring(0, pos);
                 String data = message.substring(pos + 1);
                 
-                if ("PUT".equals(accion))
+                if ("201 PUT".equals(accion))
                     gui.addMessage(data + "\n");
-                else if ("JOIN".equals(accion)) {
+                else if ("201 JOIN".equals(accion)) {
                     usuarios.add(data);
                     gui.updateList(usuarios);
                 }
-                else { // "LEFT"
+                else if ("201 LEFT".equals(accion)){ 
                     usuarios.remove(data);
                     gui.updateList(usuarios);
+                }
+                else {
+                    System.err.println("Código inválido");
                 }
             }
         }
@@ -179,7 +183,7 @@ public class ClienteTCP {
      *  @return Si la conexión ha sido cerrada correctamente.
      */
     public boolean close() {
-        outPrinter.println("CLOSE");
+        outPrinter.println("400 CLOSE");
         String message = "";
         try {
             message = inReader.readLine();
@@ -187,7 +191,7 @@ public class ClienteTCP {
             System.err.println(ex);
             System.err.println("Error al cerrar la conexión");
         }
-        return "BYE".equals(message);
+        return "401 BYE".equals(message);
     }
     
     
