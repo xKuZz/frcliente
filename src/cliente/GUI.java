@@ -101,8 +101,7 @@ public class GUI extends JFrame {
             calendar.setTime(date);
             int hour = calendar.get(Calendar.HOUR_OF_DAY);
             int minute = calendar.get(Calendar.MINUTE);
-            
-            String time = " [%2d:%2d]: ";
+            String time = " [%02d:%02d] ";
             time = String.format(time, hour, minute);
             String data = message.substring(pos + 1);
             
